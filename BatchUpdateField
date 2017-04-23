@@ -1,0 +1,36 @@
+public class BatchUpdateField implements Database.Batchable <sObject> {
+	public final String Query;
+	public final Map <String,String> fieldValues;
+	public BatchUpdateField(String q, Map <String, String> fieldValues) {
+		Query = q;
+		this.fieldValues = fieldValues;
+	}
+	public Database.QueryLocator start(Database.BatchableContext BC) {
+		return Database.getQueryLocator(query);
+	}
+	public void execute(Database.BatchableContext BC, List <sObject> scope) {
+		for (sobject s: scope) {
+			for (String fldName: fieldValues.keySet()) {
+				s.put(fldName, fieldValues.get(fldName));
+			}
+		}
+
+		update scope;
+	}
+	public void finish(Database.BatchableContext BC) {
+		AsyncApexJob a = [Select Id, Status, NumberOfErrors, JobItemsProcessed, TotalJobItems, CreatedBy.Email
+			from AsyncApexJob where Id =: BC.getJobId()];
+		string message = 'The batch Apex job processed ' + a.TotalJobItems + ' batches with ' + a.NumberOfErrors + ' failures.';
+		// Send an email to the Apex job's submitter notifying of job completion.
+		Messaging.SingleEmailMessage mail = new Messaging.SingleEmailMessage();
+		String[] toAddresses = new String[] {
+		    a.CreatedBy.Email
+		};
+		mail.setToAddresses(toAddresses);
+		mail.setSubject('Salesforce BatchUpdateField ' + a.Status);
+		mail.setPlainTextBody('The batch Apex job processed ' + a.TotalJobItems + ' batches with ' + a.NumberOfErrors + ' failures.');
+		Messaging.sendEmail(new Messaging.SingleEmailMessage[] {
+			mail
+		});
+	}
+}
