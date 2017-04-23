@@ -1,0 +1,8 @@
+global class BatchScheduler implements Schedulable {
+    global Database.Batchable<SObject> batchClass{get;set;}
+    global Integer batchSize{get;set;} {batchSize = 10;} // we can give this at runtime as well
+    
+    global void execute(SchedulableContext sc) {
+    database.executebatch(batchClass, batchSize);
+    }
+}
