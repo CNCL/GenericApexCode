@@ -1,3 +1,35 @@
+/*
+    ---How to run--
+    string query='SELECT DormantDate__c,Dormant__c,Id,LastTradeDate__c FROM ADSS_Platform_Account__c';
+    Map<String, String> sfldValues = new Map<String, String>();
+    Map <String,Date> dfldValues = new Map <String,Date>();
+    Map <String,Boolean> bfldValues = new Map <String,Boolean>();
+    sfldValues.put('negotiated_profile__c','Test2');
+    bfldValues.put('Dormant__c', True);
+    dfldValues.put('DormantDate__c' , Date.today());
+    // and so on for all fields you want to udpate
+
+    // Instantiate the batch class
+    batchupdatefield myBatch = new batchupdatefield(query,sfldValues,dfldValues,bfldValues);
+
+
+    // Instantiate the scheduler
+    BatchScheduler scheduler = new BatchScheduler();
+
+    // Assign the batch class to the variable within the scheduler
+    scheduler.batchClass = myBatch;
+    scheduler.batchSize = 50;
+
+    // Run every day at 1pm
+    String sch = '0 0 13 * * ?';
+
+    System.schedule('MyBatch - Everyday at 1pm', sch, scheduler);
+
+*/
+
+
+
+
 global class BatchScheduler implements Schedulable {
     global Database.Batchable<SObject> batchClass{get;set;}
     global Integer batchSize{get;set;} {batchSize = 10;} // we can give this at runtime as well
