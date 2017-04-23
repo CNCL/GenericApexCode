@@ -1,17 +1,51 @@
+/*
+    This is a generic batch which can be used to update on any objects 
+    
+    How to execute this batch 
+    ***************************
+    string query='SELECT DormantDate__c,Dormant__c,Id,LastTradeDate__c FROM ADSS_Platform_Account__c';
+    Map<String, String> sfldValues = new Map<String, String>();
+    Map <String,Date> dfldValues = new Map <String,Date>();
+    Map <String,Boolean> bfldValues = new Map <String,Boolean>();
+    sfldValues.put('negotiated_profile__c','Test2');
+    bfldValues.put('Dormant__c', True);
+    dfldValues.put('DormantDate__c' , Date.today());
+    // and so on for all fields you want to udpate
+    batchupdatefield batch=new batchupdatefield(query,sfldValues,dfldValues,bfldValues);
+    ------- currently due to system inefficiency we can run the batch with a batch size of 50 only
+    Database.executebatch(batch,50);
+    ****************************
+*/
+
+
 public class BatchUpdateField implements Database.Batchable <sObject> {
 	public final String Query;
-	public final Map <String,String> fieldValues;
-	public BatchUpdateField(String q, Map <String, String> fieldValues) {
+	public final Map <String,String> stringFieldValues;
+	public final Map <String,Date> dateFieldValues;
+	public final Map <String,Boolean> booleanFieldValues;
+	public BatchUpdateField(String q, 
+	                        Map <String,String> stringFieldValues,
+	                        Map <String,Date> dateFieldValues,
+	                        Map <String,Boolean> booleanFieldValues
+	                        ) {
 		Query = q;
-		this.fieldValues = fieldValues;
+		this.stringFieldValues = stringFieldValues;
+		this.dateFieldValues = dateFieldValues;
+		this.booleanFieldValues = booleanFieldValues;
 	}
 	public Database.QueryLocator start(Database.BatchableContext BC) {
 		return Database.getQueryLocator(query);
 	}
 	public void execute(Database.BatchableContext BC, List <sObject> scope) {
 		for (sobject s: scope) {
-			for (String fldName: fieldValues.keySet()) {
-				s.put(fldName, fieldValues.get(fldName));
+			for (String fldName: stringFieldValues.keySet()) {
+				s.put(fldName, stringFieldValues.get(fldName));
+			}
+			for (String fldName: dateFieldValues.keySet()) {
+				s.put(fldName, dateFieldValues.get(fldName));
+			}
+			for (String fldName: booleanFieldValues.keySet()) {
+				s.put(fldName, booleanFieldValues.get(fldName));
 			}
 		}
 
