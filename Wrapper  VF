@@ -1,0 +1,63 @@
+<apex:page standardController="Campaign" extensions="CampaignMemberHandler">
+    <apex:form >
+    
+        <apex:pageBlock title="Campaign Members" Id="memberTable">
+            <apex:actionstatus id="saveStatus">
+                <apex:facet name="start">
+                    <div class="waitingSearchDiv" id="el_loading" style="background-color: #fbfbfb;
+                    height: 100%;opacity:0.65;width:100%;"> 
+                    <div class="waitingHolder" style="top: 120px; width: 91px;">
+                    <img class="waitingImage" src="/img/loading.gif" title="Please Wait..." />
+                    <span class="waitingDescription">Please Wait...</span>
+                    </div>
+                    </div>
+                </apex:facet>
+            </apex:actionstatus>
+            <apex:pageBlockTable value="{!CampaignMemberMap}" var="cam"> 
+            
+
+                <!--<apex:inlineEditSupport showOnEdit="saveButton, cancelButton" hideOnEdit="editButton" event="ondblclick" changedStyleClass="myBoldClass" resetFunction="resetInlineEdit"/>-->
+               
+                <apex:column headerValue="Name">    
+                    <apex:outputLink target="_blank" value="/{!CampaignMemberMap[cam].cm.Id}">{!CampaignMemberMap[cam].cm.Name}</apex:outputLink>
+                </apex:column>
+                <apex:column headerValue="Lead/Contact">    
+                    <apex:outputText value="{!CampaignMemberMap[cam].cm.Type}"/>
+                </apex:column>
+                <apex:column headerValue="Phone">    
+                    <apex:outputText value="{!CampaignMemberMap[cam].cm.Phone}"/>
+                </apex:column>
+                <apex:column headerValue="Email">    
+                    <apex:outputText value="{!CampaignMemberMap[cam].cm.Email}"/>
+                </apex:column>
+                <apex:column headerValue="Lead/Contact Created Date">    
+                    <apex:outputText value="{!CampaignMemberMap[cam].cm.CreatedDate__c}"/>
+                </apex:column>
+               
+
+                <apex:column headerValue="Status">    
+                    <apex:inputField value="{!CampaignMemberMap[cam].cm.Status}" rendered="{!CampaignMemberMap[cam].editable}"/>
+                    <apex:outputField value="{!CampaignMemberMap[cam].cm.Status}" rendered="{!NOT(CampaignMemberMap[cam].editable)}"/>
+
+                </apex:column>
+                
+                <apex:column headerValue="Lead Status">
+                    <apex:inputField value="{!CampaignMemberMap[cam].cm.Lead.Status}" rendered="{!CampaignMemberMap[cam].editable}"/>
+                    <apex:outputField value="{!CampaignMemberMap[cam].cm.Lead.Status}" rendered="{!NOT(CampaignMemberMap[cam].editable)}"/>
+                </apex:column>
+
+                <apex:column headerValue="Action">
+               
+                <apex:commandButton action="{!editRecord}" value="Edit" rendered="{!NOT(CampaignMemberMap[cam].editable)}" reRender="memberTable" status="saveStatus">
+                    <apex:param name="camId" value="{!CampaignMemberMap[cam].cm.Id}" assignTo="{!memberId}"/>
+                </apex:commandButton>   
+                  
+                <apex:commandButton action="{!saveRecords}" value="Save" rendered="{!CampaignMemberMap[cam].editable}" reRender="memberTable" status="saveStatus">
+                    <apex:param name="camId" value="{!CampaignMemberMap[cam].cm.Id}" assignTo="{!memberId}"/>
+                </apex:commandButton>
+                
+                </apex:column>
+            </apex:pageBlockTable>        
+        </apex:pageBlock>
+    </apex:form>
+</apex:page>
