@@ -1,0 +1,58 @@
+public class CampaignMemberHandler {
+    private Campaign cam;
+    public String memberId{get;set;}
+    public Map<Id,WrapperMember> CampaignMemberMap{get;set;}
+    public CampaignMemberHandler(ApexPages.standardController controller){
+        memberId='';
+        this.cam= (Campaign )controller.getRecord();
+        CampaignMemberMap = new Map<Id,WrapperMember>();
+        for(CampaignMember cm : [SELECT CampaignActive__c,Lead.Name ,CampaignId,CampaignTracking__c,City,CompanyOrAccount,ContactId,Contact_Lead_owner_ID__c,Converted__c,
+            Country,CreatedDate__c,DoNotCall,Email,Fax,FirstName,FirstRespondedDate,HasOptedOutOfEmail,HasOptedOutOfFax,HasResponded,Id,LastName,
+            Last_Modified_by_Profile__c,Last_Modified_by__c,LeadId,LeadOrContactId,LeadOrContactOwnerId,LeadSource,LeadStatus__c,MemberAddedby__c,Member_Type_New__c,
+            MobilePhone,Name, NetDepositFormula__c,NetDeposit_del__c,Phone,PostalCode,RecordTypeId,Salutation,SeminarConformationLD__c,Send_QR_Code_Email_for_Seminar__c,
+            Send_Registration_Email__c,State,Status,Street,TCC_CTT__Allotted_Seating_Area__c,TCC_CTT__Attendance__c,TCC_CTT__Camp_Member_Account_Name__c,
+            TCC_CTT__Check_In_Time__c,TCC_CTT__First_Check_In_Time_Stamp__c,TCC_CTT__Generate_QR_Code__c,TCC_CTT__QR_Code_Production__c,TCC_CTT__QR_Code_Sandbox__c,
+            Title,Type,Updated_by__c,UserProfileModifiedBy__c,utmcampaign__c,utmmedium__c,utmsource__c,Lead.Status FROM CampaignMember WHERE CampaignId =:cam.Id]){
+               CampaignMemberMap.put(cm.Id,new WrapperMember(cm,false));
+        }
+    }
+
+    public PageReference EditRecord(){
+        
+        
+        CampaignMemberMap.get(memberId).editable=true;
+        return null;
+        
+    }   
+
+
+    public PageReference SaveRecords(){
+        System.debug('*****memberId**' + memberId);
+        if(memberId!=''){
+            WrapperMember wr = CampaignMemberMap.get(memberId);
+            CampaignMember cm = wr.cm; 
+            Update cm;
+            Lead l = new Lead();
+            l.Id = cm.LeadId;    
+            l.Status = cm.Lead.Status;
+            update l;
+            CampaignMemberMap.get(memberId).editable=false;
+            //memberId= '';
+    
+        }
+        return null;
+    }
+
+
+    public class WrapperMember{
+        public CampaignMember cm {get;set;}
+        public Boolean editable {get;set;}
+
+    
+        public WrapperMember(CampaignMember cm, Boolean editable){
+            this.cm=cm;
+            this.editable=editable;
+        }
+
+    }
+}
